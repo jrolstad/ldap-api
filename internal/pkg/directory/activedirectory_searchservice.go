@@ -9,14 +9,15 @@ import (
 
 type activeDirectorySearchService struct {
 	connection *ldap.Conn
+	baseDN     string
 }
 
-func (s *activeDirectorySearchService) GetUser(domain string, alias string) (*models.User, error) {
+func (s *activeDirectorySearchService) GetUser(alias string) (*models.User, error) {
 
 	filterCriteria := fmt.Sprintf("(&(objectClass=user)(sAMAccountName=%v))", alias)
 	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName"}
 
-	result, searchError := s.SearchSingle(filterCriteria, fields)
+	result, searchError := s.searchSingle(filterCriteria, fields)
 	if result == nil || searchError != nil {
 		return nil, searchError
 	}
@@ -24,11 +25,11 @@ func (s *activeDirectorySearchService) GetUser(domain string, alias string) (*mo
 	return user, nil
 }
 
-func (s *activeDirectorySearchService) GetGroup(domain string, alias string) (*models.Group, error) {
+func (s *activeDirectorySearchService) GetGroup(alias string) (*models.Group, error) {
 	filterCriteria := fmt.Sprintf("(&(objectClass=group)(sAMAccountName=%v))", alias)
 	fields := []string{"objectGUID", "sAMAccountName", "groupType", "distinguishedName"}
 
-	result, searchError := s.SearchSingle(filterCriteria, fields)
+	result, searchError := s.searchSingle(filterCriteria, fields)
 	if result == nil || searchError != nil {
 		return nil, searchError
 	}
@@ -40,15 +41,15 @@ func (s *activeDirectorySearchService) GetGroup(domain string, alias string) (*m
 	}, nil
 }
 
-func (s *activeDirectorySearchService) GetGroupMembers(domain string, name string) ([]*models.User, error) {
-	group, err := s.GetGroup(domain, name)
+func (s *activeDirectorySearchService) GetGroupMembers(name string) ([]*models.User, error) {
+	group, err := s.GetGroup(name)
 	if err != nil || group == nil {
 		return nil, err
 	}
 	filterCriteria := fmt.Sprintf("(memberOf=%v)", group.Location)
 	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName"}
 
-	searchResults, err := s.Search(filterCriteria, fields)
+	searchResults, err := s.search(filterCriteria, fields)
 	if searchResults == nil || len(searchResults) == 0 {
 		return make([]*models.User, 0), err
 	}
@@ -75,8 +76,8 @@ func (s *activeDirectorySearchService) mapSearchResultToUser(result *ldap.Entry)
 	}
 }
 
-func (s *activeDirectorySearchService) SearchSingle(filter string, fields []string) (*ldap.Entry, error) {
-	results, err := s.Search(filter, fields)
+func (s *activeDirectorySearchService) searchSingle(filter string, fields []string) (*ldap.Entry, error) {
+	results, err := s.search(filter, fields)
 	if results == nil || len(results) == 0 {
 		return nil, err
 	}
@@ -84,10 +85,10 @@ func (s *activeDirectorySearchService) SearchSingle(filter string, fields []stri
 	return results[0], err
 }
 
-func (s *activeDirectorySearchService) Search(filter string, fields []string) ([]*ldap.Entry, error) {
+func (s *activeDirectorySearchService) search(filter string, fields []string) ([]*ldap.Entry, error) {
 
 	searchRequest := ldap.NewSearchRequest(
-		"DC=internal,DC=salesforce,DC=com", // The base dn to search
+		s.baseDN, // The base dn to search
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
 		filter, // The filter to apply
 		fields, // A list attributes to retrieve

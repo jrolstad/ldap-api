@@ -3,16 +3,14 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/jrolstad/ldap-api/internal/pkg/directory"
-	"github.com/jrolstad/ldap-api/internal/pkg/orchestration"
 )
 
 func main() {
-	config := orchestration.GetConfiguration()
-	directoryService := directory.NewDirectorySearchService(config)
-	defer directoryService.Close()
+	directoryService := directory.NewDirectoryService()
+	directorySearchServiceFactory := directory.NewDirectorySearchServiceFactory()
 
 	ginHost := gin.Default()
 
-	configureRoutes(ginHost, directoryService)
+	configureRoutes(ginHost, directoryService, directorySearchServiceFactory)
 	ginHost.Run(":8080")
 }

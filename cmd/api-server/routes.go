@@ -6,35 +6,35 @@ import (
 	"github.com/jrolstad/ldap-api/internal/pkg/orchestration"
 )
 
-func configureRoutes(ginHost *gin.Engine, directoryService directory.DirectorySearchService) {
-	configureUserRoutes(ginHost, directoryService)
-	configureGroupRoutes(ginHost, directoryService)
+func configureRoutes(ginHost *gin.Engine, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) {
+	configureUserRoutes(ginHost, directoryService, searchServiceFactory)
+	configureGroupRoutes(ginHost, directoryService, searchServiceFactory)
 
 }
 
-func configureUserRoutes(ginHost *gin.Engine, directoryService directory.DirectorySearchService) {
+func configureUserRoutes(ginHost *gin.Engine, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) {
 	ginHost.GET("/:directory/user/:name", func(c *gin.Context) {
-		domain := c.Param("directory")
+		directory := c.Param("directory")
 		name := c.Param("name")
-		data, err := orchestration.GetUser(domain, name, directoryService)
+		data, err := orchestration.GetUser(directory, name, directoryService, searchServiceFactory)
 
 		returnResult(c, data, err)
 	})
 }
 
-func configureGroupRoutes(ginHost *gin.Engine, directoryService directory.DirectorySearchService) {
+func configureGroupRoutes(ginHost *gin.Engine, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) {
 	ginHost.GET("/:directory/group/:name", func(c *gin.Context) {
-		domain := c.Param("directory")
+		directory := c.Param("directory")
 		name := c.Param("name")
-		data, err := orchestration.GetGroup(domain, name, directoryService)
+		data, err := orchestration.GetGroup(directory, name, directoryService, searchServiceFactory)
 
 		returnResult(c, data, err)
 	})
 
 	ginHost.GET("/:directory/group/:name/member", func(c *gin.Context) {
-		domain := c.Param("directory")
+		directory := c.Param("directory")
 		name := c.Param("name")
-		data, err := orchestration.GetGroupMembers(domain, name, directoryService)
+		data, err := orchestration.GetGroupMembers(directory, name, directoryService, searchServiceFactory)
 
 		returnResult(c, data, err)
 	})

@@ -5,14 +5,38 @@ import (
 	"github.com/jrolstad/ldap-api/internal/pkg/models"
 )
 
-func GetUser(domain string, alias string, service directory.DirectorySearchService) (*models.User, error) {
-	return service.GetUser(domain, alias)
+func GetUser(directoryName string, name string, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) (*models.User, error) {
+	directory, err := directoryService.Get(directoryName)
+	if err != nil || directory == nil {
+		return nil, err
+	}
+
+	searchService := searchServiceFactory.NewDirectorySearchService(directory)
+	defer searchService.Close()
+
+	return searchService.GetUser(name)
 }
 
-func GetGroup(domain string, alias string, service directory.DirectorySearchService) (*models.Group, error) {
-	return service.GetGroup(domain, alias)
+func GetGroup(directoryName string, name string, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) (*models.Group, error) {
+	directory, err := directoryService.Get(directoryName)
+	if err != nil || directory == nil {
+		return nil, err
+	}
+
+	searchService := searchServiceFactory.NewDirectorySearchService(directory)
+	defer searchService.Close()
+
+	return searchService.GetGroup(name)
 }
 
-func GetGroupMembers(domain string, alias string, service directory.DirectorySearchService) ([]*models.User, error) {
-	return service.GetGroupMembers(domain, alias)
+func GetGroupMembers(directoryName string, name string, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) ([]*models.User, error) {
+	directory, err := directoryService.Get(directoryName)
+	if err != nil || directory == nil {
+		return nil, err
+	}
+
+	searchService := searchServiceFactory.NewDirectorySearchService(directory)
+	defer searchService.Close()
+	
+	return searchService.GetGroupMembers(name)
 }
