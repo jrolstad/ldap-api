@@ -6,13 +6,13 @@ import (
 	"github.com/jrolstad/ldap-api/internal/pkg/orchestration"
 )
 
-func configureRoutes(ginHost *gin.Engine, directoryService directory.DirectoryService) {
+func configureRoutes(ginHost *gin.Engine, directoryService directory.DirectorySearchService) {
 	configureUserRoutes(ginHost, directoryService)
 	configureGroupRoutes(ginHost, directoryService)
 
 }
 
-func configureUserRoutes(ginHost *gin.Engine, directoryService directory.DirectoryService) {
+func configureUserRoutes(ginHost *gin.Engine, directoryService directory.DirectorySearchService) {
 	ginHost.GET("/user/:domain/:alias", func(c *gin.Context) {
 		domain := c.Param("domain")
 		alias := c.Param("alias")
@@ -22,7 +22,7 @@ func configureUserRoutes(ginHost *gin.Engine, directoryService directory.Directo
 	})
 }
 
-func configureGroupRoutes(ginHost *gin.Engine, directoryService directory.DirectoryService) {
+func configureGroupRoutes(ginHost *gin.Engine, directoryService directory.DirectorySearchService) {
 	ginHost.GET("/group/:domain/:alias", func(c *gin.Context) {
 		domain := c.Param("domain")
 		alias := c.Param("alias")

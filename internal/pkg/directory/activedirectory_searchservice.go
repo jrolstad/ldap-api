@@ -7,11 +7,11 @@ import (
 	"log"
 )
 
-type activeDirectoryService struct {
+type activeDirectorySearchService struct {
 	connection *ldap.Conn
 }
 
-func (s *activeDirectoryService) GetUser(domain string, alias string) (*models.User, error) {
+func (s *activeDirectorySearchService) GetUser(domain string, alias string) (*models.User, error) {
 
 	filterCriteria := fmt.Sprintf("(&(objectClass=user)(sAMAccountName=%v))", alias)
 	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName"}
@@ -24,7 +24,7 @@ func (s *activeDirectoryService) GetUser(domain string, alias string) (*models.U
 	return user, nil
 }
 
-func (s *activeDirectoryService) GetGroup(domain string, alias string) (*models.Group, error) {
+func (s *activeDirectorySearchService) GetGroup(domain string, alias string) (*models.Group, error) {
 	group, err := s.getGroupDetail(domain, alias)
 	if err != nil || group == nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (s *activeDirectoryService) GetGroup(domain string, alias string) (*models.
 	return group, err
 }
 
-func (s *activeDirectoryService) getGroupDetail(domain string, alias string) (*models.Group, error) {
+func (s *activeDirectorySearchService) getGroupDetail(domain string, alias string) (*models.Group, error) {
 	filterCriteria := fmt.Sprintf("(&(objectClass=group)(sAMAccountName=%v))", alias)
 	fields := []string{"objectGUID", "sAMAccountName", "groupType", "distinguishedName"}
 
@@ -57,7 +57,7 @@ func (s *activeDirectoryService) getGroupDetail(domain string, alias string) (*m
 	}, nil
 }
 
-func (s *activeDirectoryService) getGroupMembers(distinguishedName string) ([]*models.User, error) {
+func (s *activeDirectorySearchService) getGroupMembers(distinguishedName string) ([]*models.User, error) {
 	filterCriteria := fmt.Sprintf("(memberOf=%v)", distinguishedName)
 	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName"}
 
@@ -76,7 +76,7 @@ func (s *activeDirectoryService) getGroupMembers(distinguishedName string) ([]*m
 	return members, nil
 }
 
-func (s *activeDirectoryService) mapSearchResultToUser(result *ldap.Entry) *models.User {
+func (s *activeDirectorySearchService) mapSearchResultToUser(result *ldap.Entry) *models.User {
 	return &models.User{
 		Id:        result.GetAttributeValue("objectGUID"),
 		Location:  result.GetAttributeValue("distinguishedName"),
@@ -88,7 +88,7 @@ func (s *activeDirectoryService) mapSearchResultToUser(result *ldap.Entry) *mode
 	}
 }
 
-func (s *activeDirectoryService) SearchSingle(filter string, fields []string) (*ldap.Entry, error) {
+func (s *activeDirectorySearchService) SearchSingle(filter string, fields []string) (*ldap.Entry, error) {
 	results, err := s.Search(filter, fields)
 	if results == nil || len(results) == 0 {
 		return nil, err
@@ -97,7 +97,7 @@ func (s *activeDirectoryService) SearchSingle(filter string, fields []string) (*
 	return results[0], err
 }
 
-func (s *activeDirectoryService) Search(filter string, fields []string) ([]*ldap.Entry, error) {
+func (s *activeDirectorySearchService) Search(filter string, fields []string) ([]*ldap.Entry, error) {
 
 	searchRequest := ldap.NewSearchRequest(
 		"DC=internal,DC=salesforce,DC=com", // The base dn to search
@@ -119,7 +119,7 @@ func (s *activeDirectoryService) Search(filter string, fields []string) ([]*ldap
 	return searchResults.Entries, nil
 }
 
-func (s *activeDirectoryService) Close() {
+func (s *activeDirectorySearchService) Close() {
 	s.connection.Close()
 }
 

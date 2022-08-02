@@ -8,7 +8,7 @@ import (
 
 func main() {
 	config := orchestration.GetConfiguration()
-	directoryService := directory.NewDirectoryService(config)
+	directoryService := directory.NewDirectorySearchService(config)
 	defer directoryService.Close()
 
 	ginHost := gin.Default()
