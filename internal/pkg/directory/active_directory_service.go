@@ -14,31 +14,19 @@ type activeDirectoryService struct {
 func (s *activeDirectoryService) GetUser(domain string, alias string) (*models.User, error) {
 
 	filterCriteria := fmt.Sprintf("(&(objectClass=user)(sAMAccountName=%v))", alias)
-	searchRequest := ldap.NewSearchRequest(
-		"DC=internal,DC=salesforce,DC=com", // The base dn to search
-		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		filterCriteria, // The filter to apply
-		[]string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn"}, // A list attributes to retrieve
-		nil,
-	)
+	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn"}
 
-	searchResults, err := s.connection.Search(searchRequest)
-	if err != nil {
-		log.Fatal(err)
+	result, searchError := s.SearchSingle(filterCriteria, fields)
+	if result == nil || searchError != nil {
+		return nil, searchError
 	}
-
-	if searchResults == nil || len(searchResults.Entries) == 0 {
-		return nil, nil
-	}
-
-	data := searchResults.Entries[0]
 	return &models.User{
-		Id:        data.GetAttributeValue("objectGUID"),
-		Upn:       data.GetAttributeValue("userPrincipalName"),
-		Email:     data.GetAttributeValue("mail"),
-		Name:      data.GetAttributeValue("sAMAccountName"),
-		GivenName: data.GetAttributeValue("givenName"),
-		Surname:   data.GetAttributeValue("sn"),
+		Id:        result.GetAttributeValue("objectGUID"),
+		Upn:       result.GetAttributeValue("userPrincipalName"),
+		Email:     result.GetAttributeValue("mail"),
+		Name:      result.GetAttributeValue("sAMAccountName"),
+		GivenName: result.GetAttributeValue("givenName"),
+		Surname:   result.GetAttributeValue("sn"),
 	}, nil
 }
 
@@ -49,6 +37,37 @@ func (s *activeDirectoryService) GetSecurityGroup(domain string, alias string) (
 		Name:    "BI_Alliances_Channels_Project_Leaders",
 		Members: make([]*models.User, 0),
 	}, nil
+}
+
+func (s *activeDirectoryService) SearchSingle(filter string, fields []string) (*ldap.Entry, error) {
+	results, err := s.Search(filter, fields)
+	if results == nil || len(results) == 0 {
+		return nil, err
+	}
+
+	return results[0], err
+}
+
+func (s *activeDirectoryService) Search(filter string, fields []string) ([]*ldap.Entry, error) {
+
+	searchRequest := ldap.NewSearchRequest(
+		"DC=internal,DC=salesforce,DC=com", // The base dn to search
+		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+		filter, // The filter to apply
+		fields, // A list attributes to retrieve
+		nil,
+	)
+
+	searchResults, err := s.connection.Search(searchRequest)
+	if err != nil {
+		return make([]*ldap.Entry, 0), err
+	}
+
+	if searchResults == nil {
+		return make([]*ldap.Entry, 0), nil
+	}
+
+	return searchResults.Entries, nil
 }
 
 func (s *activeDirectoryService) Close() {
