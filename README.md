@@ -34,8 +34,8 @@ The following configuration values need to be added to your environment variable
 
 |Name|Description| Sample Value                     |
 |---|---|----------------------------------|
-|ldap_user_name|User who the LDAP bind operation will run as for the default directory| jrolstad@internal.salesforce.com |
-|ldap_user_password|Password for the user being used for the LDAP bind operation| some-supersecret-value!          |
+|ldap_user_name|User who the LDAP bind operation will run as for the default directory| ```jrolstad@internal.salesforce.com``` |
+|ldap_user_password|Password for the user being used for the LDAP bind operation| ```some-supersecret-value!```          |
 
 Example setup for ~/.zshrc
 ```shell
