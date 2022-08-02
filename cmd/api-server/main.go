@@ -7,24 +7,37 @@ import (
 )
 
 func main() {
-	directoryService := directory.NewDirectoryService()
-	r := gin.Default()
+	ginHost := gin.Default()
 
-	r.GET("/user/:domain/*alias", func(c *gin.Context) {
+	configureRoutes(ginHost)
+	ginHost.Run(":8080")
+}
+
+func configureRoutes(ginHost *gin.Engine) {
+	config := orchestration.GetConfiguration()
+	directoryService := directory.NewDirectoryService(config)
+
+	ginHost.GET("/user/:domain/*alias", func(c *gin.Context) {
 		domain := c.Param("domain")
 		alias := c.Param("alias")
-		data := orchestration.GetUser(domain, alias, directoryService)
+		data, err := orchestration.GetUser(domain, alias, directoryService)
 
-		c.JSON(200, data)
+		if err != nil {
+			c.JSON(500, "Error when retrieving user")
+		} else {
+			c.JSON(200, data)
+		}
 	})
 
-	r.GET("/group/security/:domain/*alias", func(c *gin.Context) {
+	ginHost.GET("/group/security/:domain/*alias", func(c *gin.Context) {
 		domain := c.Param("domain")
 		alias := c.Param("alias")
-		data := orchestration.GetSecurityGroup(domain, alias, directoryService)
+		data, err := orchestration.GetSecurityGroup(domain, alias, directoryService)
 
-		c.JSON(200, data)
+		if err != nil {
+			c.JSON(500, "Error when retrieving group")
+		} else {
+			c.JSON(200, data)
+		}
 	})
-
-	r.Run(":8080")
 }
