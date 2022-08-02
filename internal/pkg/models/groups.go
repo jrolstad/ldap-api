@@ -2,7 +2,7 @@ package models
 
 type Group struct {
 	Id      string
-	Domain  string
+	Type    string
 	Name    string
 	Members []*User
 }

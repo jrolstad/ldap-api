@@ -9,6 +9,6 @@ func GetUser(domain string, alias string, service directory.DirectoryService) (*
 	return service.GetUser(domain, alias)
 }
 
-func GetSecurityGroup(domain string, alias string, service directory.DirectoryService) (*models.Group, error) {
-	return service.GetSecurityGroup(domain, alias)
+func GetGroup(domain string, alias string, service directory.DirectoryService) (*models.Group, error) {
+	return service.GetGroup(domain, alias)
 }

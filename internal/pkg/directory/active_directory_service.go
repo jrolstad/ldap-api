@@ -30,11 +30,18 @@ func (s *activeDirectoryService) GetUser(domain string, alias string) (*models.U
 	}, nil
 }
 
-func (s *activeDirectoryService) GetSecurityGroup(domain string, alias string) (*models.Group, error) {
+func (s *activeDirectoryService) GetGroup(domain string, alias string) (*models.Group, error) {
+	filterCriteria := fmt.Sprintf("(&(objectClass=group)(sAMAccountName=%v))", alias)
+	fields := []string{"objectGUID", "sAMAccountName", "groupType"}
+
+	result, searchError := s.SearchSingle(filterCriteria, fields)
+	if result == nil || searchError != nil {
+		return nil, searchError
+	}
 	return &models.Group{
-		Id:      "{2f3e225a-5fff-4049-8590-d3e6a96aff09}",
-		Domain:  domain,
-		Name:    "BI_Alliances_Channels_Project_Leaders",
+		Id:      result.GetAttributeValue("objectGUID"),
+		Name:    result.GetAttributeValue("sAMAccountName"),
+		Type:    result.GetAttributeValue("groupType"),
 		Members: make([]*models.User, 0),
 	}, nil
 }

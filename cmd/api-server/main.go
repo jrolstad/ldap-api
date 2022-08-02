@@ -27,10 +27,10 @@ func configureRoutes(ginHost *gin.Engine, directoryService directory.DirectorySe
 		returnResult(c, data, err)
 	})
 
-	ginHost.GET("/group/security/:domain/*alias", func(c *gin.Context) {
+	ginHost.GET("/group/:domain/:alias", func(c *gin.Context) {
 		domain := c.Param("domain")
 		alias := c.Param("alias")
-		data, err := orchestration.GetSecurityGroup(domain, alias, directoryService)
+		data, err := orchestration.GetGroup(domain, alias, directoryService)
 
 		returnResult(c, data, err)
 	})
