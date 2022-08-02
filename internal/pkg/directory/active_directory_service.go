@@ -20,20 +20,13 @@ func (s *activeDirectoryService) GetUser(domain string, alias string) (*models.U
 	if result == nil || searchError != nil {
 		return nil, searchError
 	}
-	return &models.User{
-		Id:        result.GetAttributeValue("objectGUID"),
-		Location:  result.GetAttributeValue("distinguishedName"),
-		Upn:       result.GetAttributeValue("userPrincipalName"),
-		Email:     result.GetAttributeValue("mail"),
-		Name:      result.GetAttributeValue("sAMAccountName"),
-		GivenName: result.GetAttributeValue("givenName"),
-		Surname:   result.GetAttributeValue("sn"),
-	}, nil
+	user := s.mapSearchResultToUser(result)
+	return user, nil
 }
 
 func (s *activeDirectoryService) GetGroup(domain string, alias string) (*models.Group, error) {
 	group, err := s.getGroupDetail(domain, alias)
-	if err != nil {
+	if err != nil || group == nil {
 		return nil, err
 	}
 
@@ -76,17 +69,23 @@ func (s *activeDirectoryService) getGroupMembers(distinguishedName string) ([]*m
 	members := make([]*models.User, len(searchResults))
 
 	for index, item := range searchResults {
-		member := members[index]
-		member.Id = item.GetAttributeValue("objectGUID")
-		member.Location = item.GetAttributeValue("distinguishedName")
-		member.Upn = item.GetAttributeValue("userPrincipalName")
-		member.Email = item.GetAttributeValue("mail")
-		member.Name = item.GetAttributeValue("sAMAccountName")
-		member.GivenName = item.GetAttributeValue("givenName")
-		member.Surname = item.GetAttributeValue("sn")
+		member := s.mapSearchResultToUser(item)
+		members[index] = member
 	}
 
 	return members, nil
+}
+
+func (s *activeDirectoryService) mapSearchResultToUser(result *ldap.Entry) *models.User {
+	return &models.User{
+		Id:        result.GetAttributeValue("objectGUID"),
+		Location:  result.GetAttributeValue("distinguishedName"),
+		Upn:       result.GetAttributeValue("userPrincipalName"),
+		Email:     result.GetAttributeValue("mail"),
+		Name:      result.GetAttributeValue("sAMAccountName"),
+		GivenName: result.GetAttributeValue("givenName"),
+		Surname:   result.GetAttributeValue("sn"),
+	}
 }
 
 func (s *activeDirectoryService) SearchSingle(filter string, fields []string) (*ldap.Entry, error) {
@@ -108,7 +107,7 @@ func (s *activeDirectoryService) Search(filter string, fields []string) ([]*ldap
 		nil,
 	)
 
-	searchResults, err := s.connection.Search(searchRequest)
+	searchResults, err := s.connection.SearchWithPaging(searchRequest, 100)
 	if err != nil {
 		return make([]*ldap.Entry, 0), err
 	}

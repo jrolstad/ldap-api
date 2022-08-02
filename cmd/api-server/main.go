@@ -6,6 +6,7 @@ import (
 	"github.com/jrolstad/ldap-api/internal/pkg/directory"
 	"github.com/jrolstad/ldap-api/internal/pkg/orchestration"
 	"log"
+	"reflect"
 )
 
 func main() {
@@ -42,7 +43,13 @@ func returnResult(c *gin.Context, data interface{}, err error) {
 	if err != nil {
 		log.Println(fmt.Sprintf("Error:%v", err))
 		c.JSON(500, "Error when processing request")
+	} else if isNil(data) {
+		c.JSON(404, data)
 	} else {
 		c.JSON(200, data)
 	}
+}
+
+func isNil(i interface{}) bool {
+	return i == nil || reflect.ValueOf(i).IsNil()
 }
