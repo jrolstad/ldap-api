@@ -1,19 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jrolstad/ldap-api/internal/pkg/core"
-	"log"
+	"net/http"
 )
 
-func returnResult(c *gin.Context, data interface{}, err error) {
+func returnJsonResult(c *gin.Context, data interface{}, err error) {
 	if err != nil {
-		log.Println(fmt.Sprintf("Error:%v", err))
-		c.JSON(500, "Error when processing request")
+		c.Status(http.StatusInternalServerError)
 	} else if core.IsNil(data) {
-		c.JSON(404, data)
+		c.Status(http.StatusNotFound)
 	} else {
-		c.JSON(200, data)
+		c.JSON(http.StatusOK, data)
 	}
 }

@@ -18,7 +18,7 @@ func configureUserRoutes(ginHost *gin.Engine, directoryService *directory.Direct
 		name := c.Param("name")
 		data, err := orchestration.GetUser(directory, name, directoryService, searchServiceFactory)
 
-		returnResult(c, data, err)
+		returnJsonResult(c, data, err)
 	})
 }
 
@@ -28,7 +28,7 @@ func configureGroupRoutes(ginHost *gin.Engine, directoryService *directory.Direc
 		name := c.Param("name")
 		data, err := orchestration.GetGroup(directory, name, directoryService, searchServiceFactory)
 
-		returnResult(c, data, err)
+		returnJsonResult(c, data, err)
 	})
 
 	ginHost.GET("/:directory/group/:name/member", func(c *gin.Context) {
@@ -36,6 +36,6 @@ func configureGroupRoutes(ginHost *gin.Engine, directoryService *directory.Direc
 		name := c.Param("name")
 		data, err := orchestration.GetGroupMembers(directory, name, directoryService, searchServiceFactory)
 
-		returnResult(c, data, err)
+		returnJsonResult(c, data, err)
 	})
 }
