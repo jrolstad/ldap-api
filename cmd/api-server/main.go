@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jrolstad/ldap-api/internal/pkg/directory"
 	"github.com/jrolstad/ldap-api/internal/pkg/orchestration"
+	"log"
 )
 
 func main() {
@@ -38,6 +40,7 @@ func configureRoutes(ginHost *gin.Engine, directoryService directory.DirectorySe
 
 func returnResult(c *gin.Context, data interface{}, err error) {
 	if err != nil {
+		log.Println(fmt.Sprintf("Error:%v", err))
 		c.JSON(500, "Error when processing request")
 	} else {
 		c.JSON(200, data)
