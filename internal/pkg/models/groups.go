@@ -5,5 +5,4 @@ type Group struct {
 	Location string
 	Type     string
 	Name     string
-	Members  []*User
 }

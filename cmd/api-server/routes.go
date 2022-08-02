@@ -30,4 +30,12 @@ func configureGroupRoutes(ginHost *gin.Engine, directoryService directory.Direct
 
 		returnResult(c, data, err)
 	})
+
+	ginHost.GET("/group/:domain/:alias/member", func(c *gin.Context) {
+		domain := c.Param("domain")
+		alias := c.Param("alias")
+		data, err := orchestration.GetGroupMembers(domain, alias, directoryService)
+
+		returnResult(c, data, err)
+	})
 }

@@ -12,3 +12,7 @@ func GetUser(domain string, alias string, service directory.DirectorySearchServi
 func GetGroup(domain string, alias string, service directory.DirectorySearchService) (*models.Group, error) {
 	return service.GetGroup(domain, alias)
 }
+
+func GetGroupMembers(domain string, alias string, service directory.DirectorySearchService) ([]*models.User, error) {
+	return service.GetGroupMembers(domain, alias)
+}

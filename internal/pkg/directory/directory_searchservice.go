@@ -5,6 +5,7 @@ import "github.com/jrolstad/ldap-api/internal/pkg/models"
 type DirectorySearchService interface {
 	GetUser(domain string, alias string) (*models.User, error)
 	GetGroup(domain string, alias string) (*models.Group, error)
+	GetGroupMembers(domain string, alias string) ([]*models.User, error)
 	Close()
 }
 

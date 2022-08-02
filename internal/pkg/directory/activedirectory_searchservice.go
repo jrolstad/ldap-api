@@ -25,22 +25,6 @@ func (s *activeDirectorySearchService) GetUser(domain string, alias string) (*mo
 }
 
 func (s *activeDirectorySearchService) GetGroup(domain string, alias string) (*models.Group, error) {
-	group, err := s.getGroupDetail(domain, alias)
-	if err != nil || group == nil {
-		return nil, err
-	}
-
-	members, err := s.getGroupMembers(group.Location)
-	if err != nil {
-		return group, err
-	}
-
-	group.Members = members
-
-	return group, err
-}
-
-func (s *activeDirectorySearchService) getGroupDetail(domain string, alias string) (*models.Group, error) {
 	filterCriteria := fmt.Sprintf("(&(objectClass=group)(sAMAccountName=%v))", alias)
 	fields := []string{"objectGUID", "sAMAccountName", "groupType", "distinguishedName"}
 
@@ -53,12 +37,15 @@ func (s *activeDirectorySearchService) getGroupDetail(domain string, alias strin
 		Location: result.GetAttributeValue("distinguishedName"),
 		Name:     result.GetAttributeValue("sAMAccountName"),
 		Type:     result.GetAttributeValue("groupType"),
-		Members:  make([]*models.User, 0),
 	}, nil
 }
 
-func (s *activeDirectorySearchService) getGroupMembers(distinguishedName string) ([]*models.User, error) {
-	filterCriteria := fmt.Sprintf("(memberOf=%v)", distinguishedName)
+func (s *activeDirectorySearchService) GetGroupMembers(domain string, name string) ([]*models.User, error) {
+	group, err := s.GetGroup(domain, name)
+	if err != nil || group == nil {
+		return nil, err
+	}
+	filterCriteria := fmt.Sprintf("(memberOf=%v)", group.Location)
 	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName"}
 
 	searchResults, err := s.Search(filterCriteria, fields)
