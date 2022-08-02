@@ -9,7 +9,6 @@ import (
 func configureRoutes(ginHost *gin.Engine, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) {
 	configureUserRoutes(ginHost, directoryService, searchServiceFactory)
 	configureGroupRoutes(ginHost, directoryService, searchServiceFactory)
-
 }
 
 func configureUserRoutes(ginHost *gin.Engine, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) {
