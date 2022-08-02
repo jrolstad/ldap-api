@@ -37,7 +37,7 @@ The following configuration values need to be added to your environment variable
 |ldap_user_name| User who the LDAP bind operation will run as for the default directory                                                        | ```jrolstad@internal.salesforce.com``` |
 |ldap_user_password| Password for the user being used for the LDAP bind operation.  If running as yourself, this is your Active Directory password | ```some-supersecret-value!```          |
 
-Example setup for ~/.zshrc
+If you are using [Z Shell](https://en.wikipedia.org/wiki/Z_shell) as your CLI of choice, an example setup for ~/.zshrc is:
 ```shell
 export ldap_user_name=jrolstad@internal.salesforce.com
 export ldap_user_password=some-supersecret-value! 
