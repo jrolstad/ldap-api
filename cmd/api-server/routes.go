@@ -13,28 +13,28 @@ func configureRoutes(ginHost *gin.Engine, directoryService directory.DirectorySe
 }
 
 func configureUserRoutes(ginHost *gin.Engine, directoryService directory.DirectorySearchService) {
-	ginHost.GET("/user/:domain/:alias", func(c *gin.Context) {
-		domain := c.Param("domain")
-		alias := c.Param("alias")
-		data, err := orchestration.GetUser(domain, alias, directoryService)
+	ginHost.GET("/:directory/user/:name", func(c *gin.Context) {
+		domain := c.Param("directory")
+		name := c.Param("name")
+		data, err := orchestration.GetUser(domain, name, directoryService)
 
 		returnResult(c, data, err)
 	})
 }
 
 func configureGroupRoutes(ginHost *gin.Engine, directoryService directory.DirectorySearchService) {
-	ginHost.GET("/group/:domain/:alias", func(c *gin.Context) {
-		domain := c.Param("domain")
-		alias := c.Param("alias")
-		data, err := orchestration.GetGroup(domain, alias, directoryService)
+	ginHost.GET("/:directory/group/:name", func(c *gin.Context) {
+		domain := c.Param("directory")
+		name := c.Param("name")
+		data, err := orchestration.GetGroup(domain, name, directoryService)
 
 		returnResult(c, data, err)
 	})
 
-	ginHost.GET("/group/:domain/:alias/member", func(c *gin.Context) {
-		domain := c.Param("domain")
-		alias := c.Param("alias")
-		data, err := orchestration.GetGroupMembers(domain, alias, directoryService)
+	ginHost.GET("/:directory/group/:name/member", func(c *gin.Context) {
+		domain := c.Param("directory")
+		name := c.Param("name")
+		data, err := orchestration.GetGroupMembers(domain, name, directoryService)
 
 		returnResult(c, data, err)
 	})
