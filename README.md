@@ -32,10 +32,10 @@ The following endpoints are exposed on port 8080 when the api-server code is ran
 ### Configuration Values
 The following configuration values need to be added to your environment variables.
 
-|Name|Description| Sample Value                     |
-|---|---|----------------------------------|
-|ldap_user_name|User who the LDAP bind operation will run as for the default directory| ```jrolstad@internal.salesforce.com``` |
-|ldap_user_password|Password for the user being used for the LDAP bind operation| ```some-supersecret-value!```          |
+|Name| Description                                                                                                                   | Sample Value                     |
+|---|-------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
+|ldap_user_name| User who the LDAP bind operation will run as for the default directory                                                        | ```jrolstad@internal.salesforce.com``` |
+|ldap_user_password| Password for the user being used for the LDAP bind operation.  If running as yourself, this is your Active Directory password | ```some-supersecret-value!```          |
 
 Example setup for ~/.zshrc
 ```shell
