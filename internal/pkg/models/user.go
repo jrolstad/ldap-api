@@ -8,4 +8,6 @@ type User struct {
 	Email     string
 	GivenName string
 	Surname   string
+	Manager   string
+	Type      string
 }

@@ -17,7 +17,7 @@ func (s *activeDirectoryProcessingService) ProcessAllUsers(action func([]*models
 	}
 
 	filterCriteria := "(&(objectClass=user))"
-	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName"}
+	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName", "manager", "sAMAccountType"}
 
 	processor := func(items []*ldap.Entry) {
 		data := make([]*models.User, 0)

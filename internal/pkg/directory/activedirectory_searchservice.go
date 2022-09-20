@@ -15,7 +15,7 @@ type activeDirectorySearchService struct {
 func (s *activeDirectorySearchService) GetUser(alias string) (*models.User, error) {
 
 	filterCriteria := fmt.Sprintf("(&(objectClass=user)(sAMAccountName=%v))", alias)
-	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName"}
+	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName", "manager", "sAMAccountType"}
 
 	result, searchError := s.searchSingle(filterCriteria, fields)
 	if result == nil || searchError != nil {
@@ -69,6 +69,8 @@ func (s *activeDirectorySearchService) GetGroupMembers(name string) ([]*models.U
 }
 
 func MapSearchResultToUser(result *ldap.Entry) *models.User {
+	accountTypeRaw := result.GetAttributeValue("sAMAccountType")
+
 	return &models.User{
 		Id:        result.GetAttributeValue("objectGUID"),
 		Location:  result.GetAttributeValue("distinguishedName"),
@@ -77,7 +79,30 @@ func MapSearchResultToUser(result *ldap.Entry) *models.User {
 		Name:      result.GetAttributeValue("sAMAccountName"),
 		GivenName: result.GetAttributeValue("givenName"),
 		Surname:   result.GetAttributeValue("sn"),
+		Manager:   result.GetAttributeValue("manager"),
+		Type:      MapAccountTypeToDescription(accountTypeRaw),
 	}
+}
+
+func MapAccountTypeToDescription(accountType string) string {
+	knownTypes := map[string]string{
+		"268435456":  "SAM_GROUP_OBJECT",
+		"268435457":  "SAM_NON_SECURITY_GROUP_OBJECT",
+		"536870912":  "SAM_ALIAS_OBJECT",
+		"536870913":  "SAM_NON_SECURITY_ALIAS_OBJECT",
+		"805306368":  "SAM_NORMAL_USER_ACCOUNT",
+		"805306369":  "SAM_MACHINE_ACCOUNT",
+		"805306370":  "SAM_TRUST_ACCOUNT",
+		"1073741824": "SAM_APP_BASIC_GROUP",
+		"1073741825": "SAM_APP_QUERY_GROUP",
+		"2147483647": "SAM_ACCOUNT_TYPE_MAX",
+	}
+
+	description, exists := knownTypes[accountType]
+	if exists {
+		return description
+	}
+	return accountType
 }
 
 func (s *activeDirectorySearchService) searchSingle(filter string, fields []string) (*ldap.Entry, error) {
