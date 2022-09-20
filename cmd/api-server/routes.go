@@ -19,6 +19,13 @@ func configureUserRoutes(ginHost *gin.Engine, directoryService *directory.Direct
 
 		returnJsonResult(c, data, err)
 	})
+
+	ginHost.PUT("/:directory/user", func(c *gin.Context) {
+		directory := c.Param("directory")
+		data, err := orchestration.GetUsers(directory, directoryService, searchServiceFactory)
+
+		returnJsonResult(c, data, err)
+	})
 }
 
 func configureGroupRoutes(ginHost *gin.Engine, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) {
