@@ -5,16 +5,16 @@ import (
 	"github.com/jrolstad/ldap-api/internal/pkg/models"
 )
 
-func ProcessUsers(directoryName string, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) ([]*models.User, error) {
+func ProcessUsers(directoryName string, directoryService *directory.DirectoryService, processingServiceFactory directory.DirectoryProcessingServiceFactory) error {
 	directory, err := directoryService.Get(directoryName)
 	if err != nil || directory == nil {
-		return nil, err
+		return err
 	}
 
-	searchService := searchServiceFactory.NewDirectorySearchService(directory)
-	defer searchService.Close()
+	processingService := processingServiceFactory.NewDirectoryProcessingService(directory)
+	defer processingService.Close()
 
-	return searchService.GetUsers()
+	return processingService.ProcessUsers(nil)
 }
 
 func GetUser(directoryName string, name string, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) (*models.User, error) {

@@ -6,12 +6,18 @@ import (
 	"github.com/jrolstad/ldap-api/internal/pkg/orchestration"
 )
 
-func configureRoutes(ginHost *gin.Engine, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) {
-	configureUserRoutes(ginHost, directoryService, searchServiceFactory)
+func configureRoutes(ginHost *gin.Engine,
+	directoryService *directory.DirectoryService,
+	searchServiceFactory directory.DirectorySearchServiceFactory,
+	processingServiceFactory directory.DirectoryProcessingServiceFactory) {
+	configureUserRoutes(ginHost, directoryService, searchServiceFactory, processingServiceFactory)
 	configureGroupRoutes(ginHost, directoryService, searchServiceFactory)
 }
 
-func configureUserRoutes(ginHost *gin.Engine, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) {
+func configureUserRoutes(ginHost *gin.Engine,
+	directoryService *directory.DirectoryService,
+	searchServiceFactory directory.DirectorySearchServiceFactory,
+	processingServiceFactory directory.DirectoryProcessingServiceFactory) {
 	ginHost.GET("/:directory/user/:name", func(c *gin.Context) {
 		directory := c.Param("directory")
 		name := c.Param("name")
@@ -22,9 +28,9 @@ func configureUserRoutes(ginHost *gin.Engine, directoryService *directory.Direct
 
 	ginHost.PUT("/:directory/user", func(c *gin.Context) {
 		directory := c.Param("directory")
-		data, err := orchestration.GetUsers(directory, directoryService, searchServiceFactory)
+		err := orchestration.ProcessUsers(directory, directoryService, processingServiceFactory)
 
-		returnJsonResult(c, data, err)
+		returnJsonResult(c, make([]string, 0), err)
 	})
 }
 

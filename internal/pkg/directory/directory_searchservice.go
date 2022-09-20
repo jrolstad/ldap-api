@@ -9,7 +9,3 @@ type DirectorySearchService interface {
 	GetGroupMembers(name string) ([]*models.User, error)
 	Close()
 }
-
-type DirectoryProcessingService interface {
-	ProcessUsers(action func([]*models.User)) error
-}
