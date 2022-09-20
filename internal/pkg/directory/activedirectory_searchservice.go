@@ -33,12 +33,16 @@ func (s *activeDirectorySearchService) GetGroup(alias string) (*models.Group, er
 	if result == nil || searchError != nil {
 		return nil, searchError
 	}
+	return MapSearchResultToGroup(result), nil
+}
+
+func MapSearchResultToGroup(result *ldap.Entry) *models.Group {
 	return &models.Group{
 		Id:       result.GetAttributeValue("objectGUID"),
 		Location: result.GetAttributeValue("distinguishedName"),
 		Name:     result.GetAttributeValue("sAMAccountName"),
 		Type:     result.GetAttributeValue("groupType"),
-	}, nil
+	}
 }
 
 func (s *activeDirectorySearchService) GetGroupMembers(name string) ([]*models.User, error) {

@@ -11,7 +11,7 @@ func configureRoutes(ginHost *gin.Engine,
 	searchServiceFactory directory.DirectorySearchServiceFactory,
 	processingServiceFactory directory.DirectoryProcessingServiceFactory) {
 	configureUserRoutes(ginHost, directoryService, searchServiceFactory, processingServiceFactory)
-	configureGroupRoutes(ginHost, directoryService, searchServiceFactory)
+	configureGroupRoutes(ginHost, directoryService, searchServiceFactory, processingServiceFactory)
 }
 
 func configureUserRoutes(ginHost *gin.Engine,
@@ -34,7 +34,18 @@ func configureUserRoutes(ginHost *gin.Engine,
 	})
 }
 
-func configureGroupRoutes(ginHost *gin.Engine, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) {
+func configureGroupRoutes(ginHost *gin.Engine,
+	directoryService *directory.DirectoryService,
+	searchServiceFactory directory.DirectorySearchServiceFactory,
+	processingServiceFactory directory.DirectoryProcessingServiceFactory) {
+	ginHost.GET("/:directory/group/", func(c *gin.Context) {
+		directory := c.Param("directory")
+
+		err := orchestration.ProcessAllGroups(directory, directoryService, processingServiceFactory)
+
+		returnJsonResult(c, make([]string, 0), err)
+	})
+
 	ginHost.GET("/:directory/group/:name", func(c *gin.Context) {
 		directory := c.Param("directory")
 		name := c.Param("name")

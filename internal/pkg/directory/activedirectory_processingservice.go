@@ -31,6 +31,26 @@ func (s *activeDirectoryProcessingService) ProcessAllUsers(action func([]*models
 	return s.searchWithAction(filterCriteria, fields, processor)
 }
 
+func (s *activeDirectoryProcessingService) ProcessAllGroups(action func([]*models.Group)) error {
+	if action == nil {
+		return errors.New("no action defined")
+	}
+
+	filterCriteria := "(&(objectClass=group))"
+	fields := []string{"objectGUID", "sAMAccountName", "groupType", "distinguishedName"}
+
+	processor := func(items []*ldap.Entry) {
+		data := make([]*models.Group, 0)
+		for _, item := range items {
+			group := MapSearchResultToGroup(item)
+			data = append(data, group)
+		}
+		action(data)
+	}
+
+	return s.searchWithAction(filterCriteria, fields, processor)
+}
+
 func (s *activeDirectoryProcessingService) searchWithAction(filter string, fields []string, action func([]*ldap.Entry)) error {
 
 	pagingControl := &ldap.ControlPaging{PagingSize: 100}
