@@ -26,9 +26,9 @@ func configureUserRoutes(ginHost *gin.Engine,
 		returnJsonResult(c, data, err)
 	})
 
-	ginHost.PUT("/:directory/user", func(c *gin.Context) {
+	ginHost.GET("/:directory/user", func(c *gin.Context) {
 		directory := c.Param("directory")
-		err := orchestration.ProcessUsers(directory, directoryService, processingServiceFactory)
+		err := orchestration.ProcessAllUsers(directory, directoryService, processingServiceFactory)
 
 		returnJsonResult(c, make([]string, 0), err)
 	})

@@ -3,9 +3,10 @@ package orchestration
 import (
 	"github.com/jrolstad/ldap-api/internal/pkg/directory"
 	"github.com/jrolstad/ldap-api/internal/pkg/models"
+	"log"
 )
 
-func ProcessUsers(directoryName string, directoryService *directory.DirectoryService, processingServiceFactory directory.DirectoryProcessingServiceFactory) error {
+func ProcessAllUsers(directoryName string, directoryService *directory.DirectoryService, processingServiceFactory directory.DirectoryProcessingServiceFactory) error {
 	directory, err := directoryService.Get(directoryName)
 	if err != nil || directory == nil {
 		return err
@@ -14,7 +15,12 @@ func ProcessUsers(directoryName string, directoryService *directory.DirectorySer
 	processingService := processingServiceFactory.NewDirectoryProcessingService(directory)
 	defer processingService.Close()
 
-	return processingService.ProcessUsers(nil)
+	processor := func(data []*models.User) {
+		for _, item := range data {
+			log.Println(item.Name)
+		}
+	}
+	return processingService.ProcessAllUsers(processor)
 }
 
 func GetUser(directoryName string, name string, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) (*models.User, error) {

@@ -1,7 +1,6 @@
 package directory
 
 import (
-	"errors"
 	"fmt"
 	"github.com/go-ldap/ldap/v3"
 	"github.com/jrolstad/ldap-api/internal/pkg/models"
@@ -13,24 +12,6 @@ type activeDirectorySearchService struct {
 	baseDN     string
 }
 
-func (s *activeDirectorySearchService) GetUsers() ([]*models.User, error) {
-	filterCriteria := "(&(objectClass=user))"
-	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName"}
-
-	resultSingle, searchError := s.searchSingle(filterCriteria, fields)
-	result := []*ldap.Entry{resultSingle}
-	if result == nil || searchError != nil {
-		return nil, searchError
-	}
-
-	users := make([]*models.User, len(result))
-	for index, item := range result {
-		users[index] = s.mapSearchResultToUser(item)
-	}
-
-	return users, nil
-}
-
 func (s *activeDirectorySearchService) GetUser(alias string) (*models.User, error) {
 
 	filterCriteria := fmt.Sprintf("(&(objectClass=user)(sAMAccountName=%v))", alias)
@@ -40,7 +21,7 @@ func (s *activeDirectorySearchService) GetUser(alias string) (*models.User, erro
 	if result == nil || searchError != nil {
 		return nil, searchError
 	}
-	user := s.mapSearchResultToUser(result)
+	user := MapSearchResultToUser(result)
 	return user, nil
 }
 
@@ -76,14 +57,14 @@ func (s *activeDirectorySearchService) GetGroupMembers(name string) ([]*models.U
 	members := make([]*models.User, len(searchResults))
 
 	for index, item := range searchResults {
-		member := s.mapSearchResultToUser(item)
+		member := MapSearchResultToUser(item)
 		members[index] = member
 	}
 
 	return members, nil
 }
 
-func (s *activeDirectorySearchService) mapSearchResultToUser(result *ldap.Entry) *models.User {
+func MapSearchResultToUser(result *ldap.Entry) *models.User {
 	return &models.User{
 		Id:        result.GetAttributeValue("objectGUID"),
 		Location:  result.GetAttributeValue("distinguishedName"),
@@ -125,45 +106,6 @@ func (s *activeDirectorySearchService) search(filter string, fields []string) ([
 	}
 
 	return searchResults.Entries, nil
-}
-
-func (s *activeDirectorySearchService) searchWithAction(filter string, fields []string, action func([]*ldap.Entry)) error {
-
-	pagingControl := &ldap.ControlPaging{PagingSize: 100}
-	searchRequest := ldap.NewSearchRequest(
-		s.baseDN, // The base dn to search
-		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		filter, // The filter to apply
-		fields, // A list attributes to retrieve
-		[]ldap.Control{pagingControl},
-	)
-
-	for {
-		result, err := s.connection.Search(searchRequest)
-		if err != nil {
-			return err
-		}
-		if result == nil {
-			return ldap.NewError(ldap.ErrorNetwork, errors.New("ldap: packet not received"))
-		}
-
-		action(result.Entries)
-
-		pagingResult := ldap.FindControl(result.Controls, ldap.ControlTypePaging)
-		if pagingResult == nil {
-			pagingControl = nil
-			break
-		}
-
-		cookie := pagingResult.(*ldap.ControlPaging).Cookie
-		if len(cookie) == 0 {
-			pagingControl = nil
-			break
-		}
-		pagingControl.SetCookie(cookie)
-	}
-
-	return nil
 }
 
 func (s *activeDirectorySearchService) Close() {
