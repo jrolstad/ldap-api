@@ -24,6 +24,30 @@ func (s *activeDirectorySearchService) GetUser(alias string) (*models.User, erro
 	return user, nil
 }
 
+func (s *activeDirectorySearchService) GetUserSubordinates(alias string) ([]*models.User, error) {
+
+	user, err := s.GetUser(alias)
+	if err != nil || user == nil {
+		return nil, err
+	}
+
+	filterCriteria := fmt.Sprintf("(&(manager=%v))", user.Location)
+	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName", "manager", "sAMAccountType"}
+
+	result, searchError := s.search(filterCriteria, fields)
+	if result == nil || searchError != nil {
+		return nil, searchError
+	}
+	subordinates := make([]*models.User, len(result))
+
+	for index, item := range result {
+		member := MapSearchResultToUser(item)
+		subordinates[index] = member
+	}
+
+	return subordinates, nil
+}
+
 func (s *activeDirectorySearchService) GetGroup(alias string) (*models.Group, error) {
 	filterCriteria := fmt.Sprintf("(&(objectClass=group)(sAMAccountName=%v))", alias)
 	fields := []string{"objectGUID", "sAMAccountName", "groupType", "distinguishedName"}

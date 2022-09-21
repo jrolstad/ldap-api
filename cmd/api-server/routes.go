@@ -23,6 +23,13 @@ func configureUserRoutes(ginHost *gin.Engine,
 
 		returnJsonResult(c, data, err)
 	})
+	ginHost.GET("/:directory/user/:name/subordinates", func(c *gin.Context) {
+		directory := c.Param("directory")
+		name := c.Param("name")
+		data, err := orchestration.GetUserSubordinates(directory, name, directoryService, searchServiceFactory)
+
+		returnJsonResult(c, data, err)
+	})
 }
 
 func configureGroupRoutes(ginHost *gin.Engine,
