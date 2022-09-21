@@ -54,28 +54,17 @@ func MapSearchResultToUser(result *ldap.Entry) *models.User {
 		Type:          MapAccountTypeToDescription(accountTypeRaw),
 		Company:       result.GetAttributeValue("company"),
 		Department:    result.GetAttributeValue("department"),
-		CreatedAt:     ParseLdapDate(result.GetAttributeValue("whenCreated")),
-		LastUpdatedAt: ParseLdapDate(result.GetAttributeValue("whenChanged")),
+		CreatedAt:     getAttributeTimestamp(result, "whenCreated"),
+		LastUpdatedAt: getAttributeTimestamp(result, "whenChanged"),
 		CredentialInfo: &models.UserCredentialInfo{
-			FailedLoginAttempts:    ParseIntValue(result.GetAttributeValue("badPwdCount")),
-			LastFailedLoginAttempt: ParseLdapDate(result.GetAttributeValue("badPasswordTime")),
-			LastLogin:              getLastLogin(result),
-			LoginCount:             ParseIntValue(result.GetAttributeValue("logonCount")),
-			PasswordLastSet:        ParseLdapDate(result.GetAttributeValue("pwdLastSet")),
+			FailedLoginAttempts:    getAttributeInt(result, "badPwdCount"),
+			LastFailedLoginAttempt: getAttributeDate(result, "badPasswordTime"),
+			LastLogin:              getlastLogon(result),
+			LoginCount:             getAttributeInt(result, "logonCount"),
+			PasswordLastSet:        getAttributeDate(result, "pwdLastSet"),
 		},
 	}
 
-}
-
-func getLastLogin(entry *ldap.Entry) time.Time {
-	lastLogon := ParseLdapDate(entry.GetAttributeValue("lastLogon"))
-	lastLogonTimestamp := ParseLdapDate(entry.GetAttributeValue("lastLogonTimestamp"))
-
-	if lastLogon.After(lastLogonTimestamp) {
-		return lastLogon
-	}
-
-	return lastLogonTimestamp
 }
 
 func MapAccountTypeToDescription(accountType string) string {
@@ -108,14 +97,36 @@ func MapSearchResultToGroup(result *ldap.Entry) *models.Group {
 	}
 }
 
-func ParseLdapDate(value string) time.Time {
+func getAttributeTimestamp(entry *ldap.Entry, name string) time.Time {
+	value := entry.GetAttributeValue(name)
 	date, _ := time.Parse("20060102150405.0Z07", value)
 
 	return date
 }
 
-func ParseIntValue(value string) int {
+func getAttributeInt(entry *ldap.Entry, name string) int {
+	value := entry.GetAttributeValue(name)
 	parsed, _ := strconv.Atoi(value)
 
 	return parsed
+}
+
+func getAttributeDate(entry *ldap.Entry, name string) time.Time {
+	value := getAttributeInt(entry, name)
+	seconds := value / 10000000            //Convert to seconds
+	unixTimeStamp := seconds - 11644473600 // 1.1.1600 -> 1.1.1970 difference in seconds
+
+	date := time.Unix(int64(unixTimeStamp), 0)
+	return date
+}
+
+func getlastLogon(entry *ldap.Entry) time.Time {
+	lastLogon := getAttributeDate(entry, "lastLogon")
+	lastLogonTimeStamp := getAttributeDate(entry, "lastLogonTimestamp")
+
+	if lastLogon.After(lastLogonTimeStamp) {
+		return lastLogon
+	}
+
+	return lastLogonTimeStamp
 }
