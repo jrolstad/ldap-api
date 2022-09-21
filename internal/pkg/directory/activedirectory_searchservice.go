@@ -24,7 +24,7 @@ func (s *activeDirectorySearchService) GetUser(alias string) (*models.User, erro
 	return user, nil
 }
 
-func (s *activeDirectorySearchService) GetUserSubordinates(alias string) ([]*models.User, error) {
+func (s *activeDirectorySearchService) GetUserDirects(alias string) ([]*models.User, error) {
 
 	user, err := s.GetUser(alias)
 	if err != nil || user == nil {
@@ -38,14 +38,14 @@ func (s *activeDirectorySearchService) GetUserSubordinates(alias string) ([]*mod
 	if result == nil || searchError != nil {
 		return nil, searchError
 	}
-	subordinates := make([]*models.User, len(result))
+	directs := make([]*models.User, len(result))
 
 	for index, item := range result {
 		member := MapSearchResultToUser(item)
-		subordinates[index] = member
+		directs[index] = member
 	}
 
-	return subordinates, nil
+	return directs, nil
 }
 
 func (s *activeDirectorySearchService) GetGroup(alias string) (*models.Group, error) {

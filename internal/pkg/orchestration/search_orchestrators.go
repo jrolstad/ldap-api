@@ -17,7 +17,7 @@ func GetUser(directoryName string, name string, directoryService *directory.Dire
 	return searchService.GetUser(name)
 }
 
-func GetUserSubordinates(directoryName string, name string, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) ([]*models.User, error) {
+func GetUserDirects(directoryName string, name string, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) ([]*models.User, error) {
 	directory, err := directoryService.Get(directoryName)
 	if err != nil || directory == nil {
 		return nil, err
@@ -26,7 +26,7 @@ func GetUserSubordinates(directoryName string, name string, directoryService *di
 	searchService := searchServiceFactory.NewDirectorySearchService(directory)
 	defer searchService.Close()
 
-	return searchService.GetUserSubordinates(name)
+	return searchService.GetUserDirects(name)
 }
 
 func GetGroup(directoryName string, name string, directoryService *directory.DirectoryService, searchServiceFactory directory.DirectorySearchServiceFactory) (*models.Group, error) {
