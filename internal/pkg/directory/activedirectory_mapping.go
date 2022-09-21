@@ -5,6 +5,13 @@ import (
 	"github.com/jrolstad/ldap-api/internal/pkg/models"
 )
 
+func getUserAttributes() []string {
+	return []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName", "manager", "sAMAccountType"}
+}
+func getGroupAttributes() []string {
+	return []string{"objectGUID", "sAMAccountName", "groupType", "distinguishedName"}
+}
+
 func MapSearchResultToUser(result *ldap.Entry) *models.User {
 	accountTypeRaw := result.GetAttributeValue("sAMAccountType")
 

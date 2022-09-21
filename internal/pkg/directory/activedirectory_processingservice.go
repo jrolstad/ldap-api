@@ -17,7 +17,7 @@ func (s *activeDirectoryProcessingService) ProcessAllUsers(action func([]*models
 	}
 
 	filterCriteria := "(&(objectClass=user))"
-	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName", "manager", "sAMAccountType"}
+	fields := getUserAttributes()
 
 	processor := func(items []*ldap.Entry) {
 		data := make([]*models.User, 0)
@@ -37,7 +37,7 @@ func (s *activeDirectoryProcessingService) ProcessAllGroups(action func([]*model
 	}
 
 	filterCriteria := "(&(objectClass=group))"
-	fields := []string{"objectGUID", "sAMAccountName", "groupType", "distinguishedName"}
+	fields := getGroupAttributes()
 
 	processor := func(items []*ldap.Entry) {
 		data := make([]*models.Group, 0)

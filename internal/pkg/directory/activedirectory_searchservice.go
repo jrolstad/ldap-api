@@ -14,7 +14,7 @@ type activeDirectorySearchService struct {
 func (s *activeDirectorySearchService) GetUser(alias string) (*models.User, error) {
 
 	filterCriteria := fmt.Sprintf("(&(objectClass=user)(sAMAccountName=%v))", alias)
-	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName", "manager", "sAMAccountType"}
+	fields := getUserAttributes()
 
 	result, searchError := s.searchSingle(filterCriteria, fields)
 	if result == nil || searchError != nil {
@@ -32,7 +32,7 @@ func (s *activeDirectorySearchService) GetUserSubordinates(alias string) ([]*mod
 	}
 
 	filterCriteria := fmt.Sprintf("(&(manager=%v))", user.Location)
-	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName", "manager", "sAMAccountType"}
+	fields := getUserAttributes()
 
 	result, searchError := s.search(filterCriteria, fields)
 	if result == nil || searchError != nil {
@@ -50,7 +50,7 @@ func (s *activeDirectorySearchService) GetUserSubordinates(alias string) ([]*mod
 
 func (s *activeDirectorySearchService) GetGroup(alias string) (*models.Group, error) {
 	filterCriteria := fmt.Sprintf("(&(objectClass=group)(sAMAccountName=%v))", alias)
-	fields := []string{"objectGUID", "sAMAccountName", "groupType", "distinguishedName"}
+	fields := getGroupAttributes()
 
 	result, searchError := s.searchSingle(filterCriteria, fields)
 	if result == nil || searchError != nil {
@@ -65,7 +65,7 @@ func (s *activeDirectorySearchService) GetGroupMembers(name string) ([]*models.U
 		return nil, err
 	}
 	filterCriteria := fmt.Sprintf("(memberOf=%v)", group.Location)
-	fields := []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName"}
+	fields := getUserAttributes()
 
 	searchResults, err := s.search(filterCriteria, fields)
 	if searchResults == nil || len(searchResults) == 0 {
