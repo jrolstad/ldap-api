@@ -8,16 +8,14 @@ import (
 
 func configureRoutes(ginHost *gin.Engine,
 	directoryService *directory.DirectoryService,
-	searchServiceFactory directory.DirectorySearchServiceFactory,
-	processingServiceFactory directory.DirectoryProcessingServiceFactory) {
-	configureUserRoutes(ginHost, directoryService, searchServiceFactory, processingServiceFactory)
-	configureGroupRoutes(ginHost, directoryService, searchServiceFactory, processingServiceFactory)
+	searchServiceFactory directory.DirectorySearchServiceFactory) {
+	configureUserRoutes(ginHost, directoryService, searchServiceFactory)
+	configureGroupRoutes(ginHost, directoryService, searchServiceFactory)
 }
 
 func configureUserRoutes(ginHost *gin.Engine,
 	directoryService *directory.DirectoryService,
-	searchServiceFactory directory.DirectorySearchServiceFactory,
-	processingServiceFactory directory.DirectoryProcessingServiceFactory) {
+	searchServiceFactory directory.DirectorySearchServiceFactory) {
 	ginHost.GET("/:directory/user/:name", func(c *gin.Context) {
 		directory := c.Param("directory")
 		name := c.Param("name")
@@ -25,26 +23,11 @@ func configureUserRoutes(ginHost *gin.Engine,
 
 		returnJsonResult(c, data, err)
 	})
-
-	ginHost.GET("/:directory/user", func(c *gin.Context) {
-		directory := c.Param("directory")
-		err := orchestration.ProcessAllUsers(directory, directoryService, processingServiceFactory)
-
-		returnJsonResult(c, make([]string, 0), err)
-	})
 }
 
 func configureGroupRoutes(ginHost *gin.Engine,
 	directoryService *directory.DirectoryService,
-	searchServiceFactory directory.DirectorySearchServiceFactory,
-	processingServiceFactory directory.DirectoryProcessingServiceFactory) {
-	ginHost.GET("/:directory/group/", func(c *gin.Context) {
-		directory := c.Param("directory")
-
-		err := orchestration.ProcessAllGroups(directory, directoryService, processingServiceFactory)
-
-		returnJsonResult(c, make([]string, 0), err)
-	})
+	searchServiceFactory directory.DirectorySearchServiceFactory) {
 
 	ginHost.GET("/:directory/group/:name", func(c *gin.Context) {
 		directory := c.Param("directory")

@@ -10,10 +10,9 @@ func main() {
 	configurationService := configuration.NewConfigurationService()
 	directoryService := directory.NewDirectoryService()
 	directorySearchServiceFactory := directory.NewDirectorySearchServiceFactory(configurationService)
-	directoryProcessingServiceFactory := directory.NewDirectoryProcessingServiceFactory(configurationService)
 	
 	ginHost := gin.Default()
 
-	configureRoutes(ginHost, directoryService, directorySearchServiceFactory, directoryProcessingServiceFactory)
+	configureRoutes(ginHost, directoryService, directorySearchServiceFactory)
 	ginHost.Run(":8080")
 }
