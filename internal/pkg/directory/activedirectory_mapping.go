@@ -3,29 +3,79 @@ package directory
 import (
 	"github.com/go-ldap/ldap/v3"
 	"github.com/jrolstad/ldap-api/internal/pkg/models"
+	"strconv"
+	"time"
 )
 
 func getUserAttributes() []string {
-	return []string{"objectGUID", "sAMAccountName", "mail", "userPrincipalName", "givenName", "sn", "distinguishedName", "manager", "sAMAccountType"}
+	return []string{
+		"objectGUID",
+		"sAMAccountName",
+		"mail",
+		"userPrincipalName",
+		"givenName",
+		"sn",
+		"distinguishedName",
+		"manager",
+		"sAMAccountType",
+		"company",
+		"department",
+		"whenCreated",
+		"whenChanged",
+		"logonCount",
+		"badPwdCount",
+		"badPasswordTime",
+		"pwdLastSet",
+		"lastLogon",
+		"lastLogonTimestamp",
+	}
 }
 func getGroupAttributes() []string {
-	return []string{"objectGUID", "sAMAccountName", "groupType", "distinguishedName"}
+	return []string{
+		"objectGUID",
+		"sAMAccountName",
+		"groupType",
+		"distinguishedName",
+	}
 }
 
 func MapSearchResultToUser(result *ldap.Entry) *models.User {
 	accountTypeRaw := result.GetAttributeValue("sAMAccountType")
 
 	return &models.User{
-		Id:        result.GetAttributeValue("objectGUID"),
-		Location:  result.GetAttributeValue("distinguishedName"),
-		Upn:       result.GetAttributeValue("userPrincipalName"),
-		Email:     result.GetAttributeValue("mail"),
-		Name:      result.GetAttributeValue("sAMAccountName"),
-		GivenName: result.GetAttributeValue("givenName"),
-		Surname:   result.GetAttributeValue("sn"),
-		Manager:   result.GetAttributeValue("manager"),
-		Type:      MapAccountTypeToDescription(accountTypeRaw),
+		Id:            result.GetAttributeValue("objectGUID"),
+		Location:      result.GetAttributeValue("distinguishedName"),
+		Upn:           result.GetAttributeValue("userPrincipalName"),
+		Email:         result.GetAttributeValue("mail"),
+		Name:          result.GetAttributeValue("sAMAccountName"),
+		GivenName:     result.GetAttributeValue("givenName"),
+		Surname:       result.GetAttributeValue("sn"),
+		Manager:       result.GetAttributeValue("manager"),
+		Type:          MapAccountTypeToDescription(accountTypeRaw),
+		Company:       result.GetAttributeValue("company"),
+		Department:    result.GetAttributeValue("department"),
+		CreatedAt:     ParseLdapDate(result.GetAttributeValue("whenCreated")),
+		LastUpdatedAt: ParseLdapDate(result.GetAttributeValue("whenChanged")),
+		CredentialInfo: &models.UserCredentialInfo{
+			FailedLoginAttempts:    ParseIntValue(result.GetAttributeValue("badPwdCount")),
+			LastFailedLoginAttempt: ParseLdapDate(result.GetAttributeValue("badPasswordTime")),
+			LastLogin:              getLastLogin(result),
+			LoginCount:             ParseIntValue(result.GetAttributeValue("logonCount")),
+			PasswordLastSet:        ParseLdapDate(result.GetAttributeValue("pwdLastSet")),
+		},
 	}
+
+}
+
+func getLastLogin(entry *ldap.Entry) time.Time {
+	lastLogon := ParseLdapDate(entry.GetAttributeValue("lastLogon"))
+	lastLogonTimestamp := ParseLdapDate(entry.GetAttributeValue("lastLogonTimestamp"))
+
+	if lastLogon.After(lastLogonTimestamp) {
+		return lastLogon
+	}
+
+	return lastLogonTimestamp
 }
 
 func MapAccountTypeToDescription(accountType string) string {
@@ -56,4 +106,16 @@ func MapSearchResultToGroup(result *ldap.Entry) *models.Group {
 		Name:     result.GetAttributeValue("sAMAccountName"),
 		Type:     result.GetAttributeValue("groupType"),
 	}
+}
+
+func ParseLdapDate(value string) time.Time {
+	date, _ := time.Parse("20060102150405.0Z07", value)
+
+	return date
+}
+
+func ParseIntValue(value string) int {
+	parsed, _ := strconv.Atoi(value)
+
+	return parsed
 }
