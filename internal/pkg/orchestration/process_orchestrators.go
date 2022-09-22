@@ -3,10 +3,12 @@ package orchestration
 import (
 	"github.com/jrolstad/ldap-api/internal/pkg/directory"
 	"github.com/jrolstad/ldap-api/internal/pkg/models"
-	"log"
+	"github.com/jrolstad/ldap-api/internal/pkg/publishers"
 )
 
-func ProcessAllUsers(directoryName string, directoryService *directory.DirectoryService, processingServiceFactory directory.DirectoryProcessingServiceFactory) error {
+func ProcessAllUsers(directoryName string, directoryService *directory.DirectoryService,
+	processingServiceFactory directory.DirectoryProcessingServiceFactory,
+	publisher publishers.DirectoryObjectPublisher) error {
 	directory, err := directoryService.Get(directoryName)
 	if err != nil || directory == nil {
 		return err
@@ -17,13 +19,15 @@ func ProcessAllUsers(directoryName string, directoryService *directory.Directory
 
 	processor := func(data []*models.User) {
 		for _, item := range data {
-			log.Println(item.Name)
+			publisher.Publish(item)
 		}
 	}
 	return processingService.ProcessAllUsers(processor)
 }
 
-func ProcessAllGroups(directoryName string, directoryService *directory.DirectoryService, processingServiceFactory directory.DirectoryProcessingServiceFactory) error {
+func ProcessAllGroups(directoryName string, directoryService *directory.DirectoryService,
+	processingServiceFactory directory.DirectoryProcessingServiceFactory,
+	publisher publishers.DirectoryObjectPublisher) error {
 	directory, err := directoryService.Get(directoryName)
 	if err != nil || directory == nil {
 		return err
@@ -34,7 +38,7 @@ func ProcessAllGroups(directoryName string, directoryService *directory.Director
 
 	processor := func(data []*models.Group) {
 		for _, item := range data {
-			log.Println(item.Name)
+			publisher.Publish(item)
 		}
 	}
 	return processingService.ProcessAllGroups(processor)

@@ -5,6 +5,7 @@ import (
 	"github.com/jrolstad/ldap-api/internal/pkg/configuration"
 	"github.com/jrolstad/ldap-api/internal/pkg/directory"
 	"github.com/jrolstad/ldap-api/internal/pkg/orchestration"
+	"github.com/jrolstad/ldap-api/internal/pkg/publishers"
 )
 
 var (
@@ -17,6 +18,7 @@ func main() {
 	configurationService := configuration.NewConfigurationService()
 	directoryService := directory.NewDirectoryService()
 	directoryProcessingServiceFactory := directory.NewDirectoryProcessingServiceFactory(configurationService)
+	publisher := publishers.NewDirectoryObjectPublisher(&configurationService)
 
-	orchestration.ProcessAllUsers(*directoryArgument, directoryService, directoryProcessingServiceFactory)
+	orchestration.ProcessAllUsers(*directoryArgument, directoryService, directoryProcessingServiceFactory, publisher)
 }
