@@ -15,6 +15,7 @@ type User struct {
 	Company        string
 	Department     string
 	Status         string
+	Title          string
 	CredentialInfo *UserCredentialInfo
 
 	CreatedAt     time.Time
