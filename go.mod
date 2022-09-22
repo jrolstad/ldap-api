@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/Azure/go-ntlmssp v0.0.0-20220621081337-cb9428e4ac1e // indirect
+	github.com/aws/aws-lambda-go v1.34.1 // indirect
 	github.com/aws/aws-sdk-go v1.44.103 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.8.1 // indirect
