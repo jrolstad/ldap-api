@@ -32,15 +32,28 @@ The following endpoints are exposed on port 8080 when the api-server code is ran
 ### Configuration Values
 The following configuration values need to be added to your environment variables.
 
-|Name| Description                                                                                                                   | Sample Value                     |
-|---|-------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
-|ldap_user_name| User who the LDAP bind operation will run as for the default directory                                                        | ```jrolstad@internal.salesforce.com``` |
-|ldap_user_password| Password for the user being used for the LDAP bind operation.  If running as yourself, this is your Active Directory password | ```some-supersecret-value!```          |
-
+| Name                  | Description                                                                                                                   | Sample Value                           |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------|----------------------------------------|
+| ldap_user_name        | User who the LDAP bind operation will run as for the default directory                                                        | ```jrolstad@internal.salesforce.com``` |
+| ldap_user_password    | Password for the user being used for the LDAP bind operation.  If running as yourself, this is your Active Directory password | ```some-supersecret-value!```          |
+| ldap_host             | Host Name of the LDAP server connecting to                                                                                    | ```internal.mydomain.com:636```        |
+| directoryobject_queue | Name of the queue to publish directory objects to                                                                             | ```my-ingestion-queue```               |
+| aws_region            | Region where AWS resources are hosted                                                                                         | ```us-west-2```                        |
+| AWS_ACCESS_KEY_ID     | AWS Client Id to authenticate as                                                                                              | ```some value```                       |
+| AWS_SECRET_ACCESS_KEY | AWS Client Secret to use when authenticating                                                                                  | ```some secret value```                |
+| AWS_SESSION_TOKEN     | AWS Secret Token to use when authenticating                                                                                   | ```some token value```                 |
 If you are using [Z Shell](https://en.wikipedia.org/wiki/Z_shell) as your CLI of choice, an example setup for ~/.zshrc is:
 ```shell
-export ldap_user_name=jrolstad@internal.salesforce.com
+export ldap_host=internal.mydomain.com:636
+export ldap_user_name=jrolstad@mydomain.com
 export ldap_user_password=some-supersecret-value! 
+
+export directoryobject_queue=identityobject-ingest
+
+export aws_region=us-west-2
+export AWS_ACCESS_KEY_ID=value-here
+export AWS_SECRET_ACCESS_KEY=secret-here
+export AWS_SESSION_TOKEN=token-here
 ```
 
 ### How to Run
