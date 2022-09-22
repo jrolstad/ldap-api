@@ -2,13 +2,13 @@ package publishers
 
 import (
 	"errors"
-	"github.com/jrolstad/ldap-api/internal/pkg/configuration"
-	"github.com/jrolstad/ldap-api/internal/pkg/core"
+	"github.com/jrolstad/ldap-api/internal/pkg/messaging"
 	"log"
 )
 
 type SqsDirectoryObjectPublisher struct {
-	configuration *configuration.ConfigurationService
+	target     string
+	messageHub messaging.MessageHub
 }
 
 func (s *SqsDirectoryObjectPublisher) Publish(toPublish interface{}) error {
@@ -16,9 +16,11 @@ func (s *SqsDirectoryObjectPublisher) Publish(toPublish interface{}) error {
 		return errors.New("unable to publish nil object")
 	}
 
-	serializedObject := core.MapToJson(toPublish)
-	log.Println(serializedObject)
+	err := s.messageHub.Send(toPublish, s.target)
 
-	return nil
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return err
 
 }
