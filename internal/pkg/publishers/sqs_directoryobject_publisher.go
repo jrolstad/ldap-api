@@ -18,6 +18,7 @@ func (s *SqsDirectoryObjectPublisher) Publish(toPublish interface{}) error {
 
 	serializedObject := core.MapToJson(toPublish)
 	log.Println(serializedObject)
-	
+
 	return nil
+
 }

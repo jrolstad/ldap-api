@@ -28,6 +28,7 @@ func getUserAttributes() []string {
 		"pwdLastSet",
 		"lastLogon",
 		"lastLogonTimestamp",
+		"userAccountControl",
 	}
 }
 func getGroupAttributes() []string {
@@ -54,6 +55,7 @@ func MapSearchResultToUser(result *ldap.Entry) *models.User {
 		Type:          MapAccountTypeToDescription(accountTypeRaw),
 		Company:       result.GetAttributeValue("company"),
 		Department:    result.GetAttributeValue("department"),
+		Status:        result.GetAttributeValue("userAccountControl"),
 		CreatedAt:     getAttributeTimestamp(result, "whenCreated"),
 		LastUpdatedAt: getAttributeTimestamp(result, "whenChanged"),
 		CredentialInfo: &models.UserCredentialInfo{
