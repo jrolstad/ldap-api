@@ -11,12 +11,12 @@ type SqsDirectoryObjectPublisher struct {
 	messageHub messaging.MessageHub
 }
 
-func (s *SqsDirectoryObjectPublisher) Publish(toPublish interface{}) error {
+func (s *SqsDirectoryObjectPublisher) Publish(toPublish []interface{}) error {
 	if toPublish == nil {
 		return errors.New("unable to publish nil object")
 	}
 
-	err := s.messageHub.Send(toPublish, s.target)
+	err := s.messageHub.SendBulk(toPublish, s.target)
 
 	if err != nil {
 		log.Fatalln(err)

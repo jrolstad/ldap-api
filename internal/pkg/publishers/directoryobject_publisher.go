@@ -6,7 +6,7 @@ import (
 )
 
 type DirectoryObjectPublisher interface {
-	Publish(toPublish interface{}) error
+	Publish(toPublish []interface{}) error
 }
 
 func NewDirectoryObjectPublisher(configuration configuration.ConfigurationService, messageHub messaging.MessageHub) DirectoryObjectPublisher {

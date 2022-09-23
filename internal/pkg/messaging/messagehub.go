@@ -8,6 +8,7 @@ import (
 
 type MessageHub interface {
 	Send(toSend interface{}, target string) error
+	SendBulk(toSend []interface{}, target string) error
 }
 
 func NewMessageHub(config configuration.ConfigurationService) MessageHub {

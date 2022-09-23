@@ -1,9 +1,11 @@
 package orchestration
 
 import (
+	"github.com/jrolstad/ldap-api/internal/pkg/core"
 	"github.com/jrolstad/ldap-api/internal/pkg/directory"
 	"github.com/jrolstad/ldap-api/internal/pkg/models"
 	"github.com/jrolstad/ldap-api/internal/pkg/publishers"
+	"log"
 )
 
 func ProcessAllUsers(directoryName string, directoryService *directory.DirectoryService,
@@ -18,9 +20,11 @@ func ProcessAllUsers(directoryName string, directoryService *directory.Directory
 	defer processingService.Close()
 
 	processor := func(data []*models.User) {
-		for _, item := range data {
-			publisher.Publish(item)
-		}
+		publishedCount := len(data)
+		toPublish := core.ToInterfaceSlice(data)
+		publisher.Publish(toPublish)
+
+		log.Printf("Published %v users", publishedCount)
 	}
 	return processingService.ProcessAllUsers(processor)
 }
@@ -37,9 +41,10 @@ func ProcessAllGroups(directoryName string, directoryService *directory.Director
 	defer processingService.Close()
 
 	processor := func(data []*models.Group) {
-		for _, item := range data {
-			publisher.Publish(item)
-		}
+		publishedCount := len(data)
+		toPublish := core.ToInterfaceSlice(data)
+		publisher.Publish(toPublish)
+		log.Printf("Published %v groups", publishedCount)
 	}
 	return processingService.ProcessAllGroups(processor)
 }
