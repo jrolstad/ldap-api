@@ -2,6 +2,7 @@ package directory
 
 import (
 	"github.com/go-ldap/ldap/v3"
+	"github.com/google/uuid"
 	"github.com/jrolstad/ldap-api/internal/pkg/models"
 	"strconv"
 	"time"
@@ -45,7 +46,7 @@ func MapSearchResultToUser(result *ldap.Entry) *models.User {
 	accountTypeRaw := result.GetAttributeValue("sAMAccountType")
 
 	return &models.User{
-		Id:            result.GetAttributeValue("objectGUID"),
+		Id:            getObjectGuid(result).String(),
 		ObjectType:    "User",
 		Location:      result.GetAttributeValue("distinguishedName"),
 		Upn:           result.GetAttributeValue("userPrincipalName"),
@@ -95,7 +96,7 @@ func MapAccountTypeToDescription(accountType string) string {
 
 func MapSearchResultToGroup(result *ldap.Entry) *models.Group {
 	return &models.Group{
-		Id:         result.GetAttributeValue("objectGUID"),
+		Id:         getObjectGuid(result).String(),
 		ObjectType: "Group",
 		Location:   result.GetAttributeValue("distinguishedName"),
 		Name:       result.GetAttributeValue("sAMAccountName"),
@@ -135,4 +136,10 @@ func getlastLogon(entry *ldap.Entry) time.Time {
 	}
 
 	return lastLogonTimeStamp
+}
+
+func getObjectGuid(entry *ldap.Entry) uuid.UUID {
+	value, _ := uuid.FromBytes(entry.GetRawAttributeValue("objectGUID"))
+
+	return value
 }
