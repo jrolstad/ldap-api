@@ -1,9 +1,7 @@
 package models
 
-type Group struct {
+type DirectoryObject struct {
 	Id         string
 	ObjectType string
-	Location   string
-	Type       string
 	Name       string
 }

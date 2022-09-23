@@ -12,3 +12,9 @@ func MapToJson(toMap interface{}) string {
 
 	return string(result)
 }
+
+func MapFromJson(toMap string, target interface{}) error {
+	err := json.Unmarshal([]byte(toMap), target)
+
+	return err
+}

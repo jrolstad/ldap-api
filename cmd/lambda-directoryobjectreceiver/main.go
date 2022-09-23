@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/google/uuid"
+	"github.com/jrolstad/ldap-api/internal/pkg/core"
+	"github.com/jrolstad/ldap-api/internal/pkg/models"
 	"log"
 	"os"
 	"strings"
@@ -41,9 +44,12 @@ func handler(ctx context.Context, event events.SQSEvent) error {
 }
 
 func processEvent(message events.SQSMessage) error {
+	directoryObject := &models.DirectoryObject{}
+	core.MapFromJson(message.Body, directoryObject)
+
 	input := &s3manager.UploadInput{
 		Bucket:      aws.String(bucketName),
-		Key:         aws.String(getFileKey(message)),
+		Key:         aws.String(getFileKey(directoryObject)),
 		Body:        strings.NewReader(message.Body),
 		ContentType: aws.String("application/json"),
 	}
@@ -55,12 +61,27 @@ func processEvent(message events.SQSMessage) error {
 	return nil
 }
 
-func getFileKey(message events.SQSMessage) string {
-	if message.MessageId != "" {
-		return message.MessageId
+func getFileKey(item *models.DirectoryObject) string {
+	path := resolveItemPath(item)
+	identifier := resolveItemId(item)
+
+	return fmt.Sprintf("%v/%v", path, identifier)
+}
+
+func resolveItemPath(item *models.DirectoryObject) string {
+	if item == nil || item.ObjectType == "" {
+		return "unknown"
 	}
 
-	return uuid.New().String()
+	return strings.ToLower(item.ObjectType)
+}
+
+func resolveItemId(item *models.DirectoryObject) string {
+	if item == nil || item.Id == "" {
+		return uuid.New().String()
+	}
+
+	return strings.ToLower(item.Id)
 }
 
 func initS3Uploader() *s3manager.Uploader {

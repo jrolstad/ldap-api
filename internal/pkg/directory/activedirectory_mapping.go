@@ -46,6 +46,7 @@ func MapSearchResultToUser(result *ldap.Entry) *models.User {
 
 	return &models.User{
 		Id:            result.GetAttributeValue("objectGUID"),
+		ObjectType:    "User",
 		Location:      result.GetAttributeValue("distinguishedName"),
 		Upn:           result.GetAttributeValue("userPrincipalName"),
 		Email:         result.GetAttributeValue("mail"),
@@ -94,10 +95,11 @@ func MapAccountTypeToDescription(accountType string) string {
 
 func MapSearchResultToGroup(result *ldap.Entry) *models.Group {
 	return &models.Group{
-		Id:       result.GetAttributeValue("objectGUID"),
-		Location: result.GetAttributeValue("distinguishedName"),
-		Name:     result.GetAttributeValue("sAMAccountName"),
-		Type:     result.GetAttributeValue("groupType"),
+		Id:         result.GetAttributeValue("objectGUID"),
+		ObjectType: "Group",
+		Location:   result.GetAttributeValue("distinguishedName"),
+		Name:       result.GetAttributeValue("sAMAccountName"),
+		Type:       result.GetAttributeValue("groupType"),
 	}
 }
 

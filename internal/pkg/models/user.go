@@ -4,6 +4,7 @@ import "time"
 
 type User struct {
 	Id             string
+	ObjectType     string
 	Location       string
 	Upn            string
 	Name           string
