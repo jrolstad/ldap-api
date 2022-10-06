@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/google/uuid"
-	"github.com/jrolstad/ldap-api/internal/pkg/core"
 	"github.com/jrolstad/ldap-api/internal/pkg/models"
 	"log"
 	"os"
@@ -25,12 +24,11 @@ func (r *S3DirectoryObjectRepository) init() {
 }
 
 func (r *S3DirectoryObjectRepository) Save(item *models.DirectoryObject) error {
-	serializedData := core.MapToJson(item)
 
 	input := &s3manager.UploadInput{
 		Bucket:      aws.String(r.bucketName),
 		Key:         aws.String(r.getFileKey(item)),
-		Body:        strings.NewReader(serializedData),
+		Body:        strings.NewReader(item.Data),
 		ContentType: aws.String("application/json"),
 	}
 	_, err := r.fileUploader.UploadWithContext(context.Background(), input)
@@ -74,4 +72,8 @@ func (r *S3DirectoryObjectRepository) initS3Uploader() *s3manager.Uploader {
 
 	uploader := s3manager.NewUploader(sess)
 	return uploader
+}
+
+func (r *S3DirectoryObjectRepository) Destroy() {
+
 }

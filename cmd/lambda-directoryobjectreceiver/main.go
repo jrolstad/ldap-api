@@ -37,6 +37,7 @@ func handler(ctx context.Context, event events.SQSEvent) error {
 func processEvent(message events.SQSMessage) error {
 	directoryObject := &models.DirectoryObject{}
 	core.MapFromJson(message.Body, directoryObject)
+	directoryObject.Data = message.Body
 
 	err := repository.Save(directoryObject)
 	return err
