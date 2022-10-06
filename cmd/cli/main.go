@@ -11,6 +11,7 @@ import (
 
 var (
 	directoryArgument = flag.String("directory", "", "Directory to Search")
+	objectArgument    = flag.String("object", "user", "Type of object to search.  Default is user")
 )
 
 func main() {
@@ -22,5 +23,9 @@ func main() {
 	messageHub := messaging.NewMessageHub(configurationService)
 	publisher := publishers.NewDirectoryObjectPublisher(configurationService, messageHub)
 
-	orchestration.ProcessAllUsers(*directoryArgument, directoryService, directoryProcessingServiceFactory, publisher)
+	if *objectArgument == "group" {
+		orchestration.ProcessAllGroups(*directoryArgument, directoryService, directoryProcessingServiceFactory, publisher)
+	} else {
+		orchestration.ProcessAllUsers(*directoryArgument, directoryService, directoryProcessingServiceFactory, publisher)
+	}
 }
