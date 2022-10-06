@@ -66,3 +66,13 @@ Once the gin server is up and running, GET calls can be made via cURL or in a br
 * http://localhost:8080/internal.salesforce.com/user/jrolstad
 * http://localhost:8080/internal.salesforce.com/group/mygroupname
 * http://localhost:8080/internal.salesforce.com/group/mygroupname/member
+
+### How to Build
+When deploying the lambda function, they will need to be built and zipped using instructions at https://docs.aws.amazon.com/lambda/latest/dg/golang-package.html
+```shell
+cd cmd/lambda-directoryobjectreceiver
+
+GOOS=linux go build main.go
+
+zip main.zip main
+```
