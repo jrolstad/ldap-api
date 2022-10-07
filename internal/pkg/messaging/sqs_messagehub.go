@@ -27,8 +27,9 @@ func (hub *SqsMessageHub) Send(toSend interface{}, target string) error {
 }
 
 func (hub *SqsMessageHub) SendBulk(toSend []interface{}, target string) error {
-	const maxBatchSize = 10
-	batches, segmentErr := core.Segment(toSend, maxBatchSize)
+	const maxBatchSizeInBytes = 262144 //256KB
+	const maxBatchSizeInItems = 10
+	batches, segmentErr := core.SegmentByJsonByteLength(toSend, maxBatchSizeInBytes, maxBatchSizeInItems)
 	if segmentErr != nil {
 		return segmentErr
 	}
