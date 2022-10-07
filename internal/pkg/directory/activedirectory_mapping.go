@@ -31,6 +31,7 @@ func getUserAttributes() []string {
 		"lastLogonTimestamp",
 		"userAccountControl",
 		"title",
+		"memberOf",
 	}
 }
 func getGroupAttributes() []string {
@@ -39,6 +40,7 @@ func getGroupAttributes() []string {
 		"sAMAccountName",
 		"groupType",
 		"distinguishedName",
+		"member",
 	}
 }
 
@@ -69,6 +71,7 @@ func MapSearchResultToUser(result *ldap.Entry) *models.User {
 			LoginCount:             getAttributeInt(result, "logonCount"),
 			PasswordLastSet:        getAttributeDate(result, "pwdLastSet"),
 		},
+		GroupMembership: result.GetAttributeValues("memberOf"),
 	}
 
 }
@@ -102,6 +105,7 @@ func MapSearchResultToGroup(result *ldap.Entry) *models.Group {
 		Location:   result.GetAttributeValue("distinguishedName"),
 		Name:       result.GetAttributeValue("sAMAccountName"),
 		Type:       mappedType,
+		Members:    result.GetAttributeValues("member"),
 	}
 }
 
