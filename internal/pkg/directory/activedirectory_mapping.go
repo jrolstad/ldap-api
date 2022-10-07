@@ -95,13 +95,31 @@ func MapAccountTypeToDescription(accountType string) string {
 }
 
 func MapSearchResultToGroup(result *ldap.Entry) *models.Group {
+	mappedType := mapGroupTypeToDescription(result.GetAttributeValue("groupType"))
 	return &models.Group{
 		Id:         getObjectGuid(result).String(),
 		ObjectType: "Group",
 		Location:   result.GetAttributeValue("distinguishedName"),
 		Name:       result.GetAttributeValue("sAMAccountName"),
-		Type:       result.GetAttributeValue("groupType"),
+		Type:       mappedType,
 	}
+}
+
+func mapGroupTypeToDescription(value string) string {
+	knownTypes := map[string]string{
+		"2":           "Global distribution group",
+		"4":           "Domain Local distribution group",
+		"8":           "Universal distribution group",
+		"-2147483646": "Global security group",
+		"-2147483644": "Domain Local security group",
+		"-2147483640": "Universal security group",
+	}
+
+	description, exists := knownTypes[value]
+	if exists {
+		return description
+	}
+	return value
 }
 
 func getAttributeTimestamp(entry *ldap.Entry, name string) time.Time {
