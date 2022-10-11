@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS `user_data`;
+
 CREATE EXTERNAL TABLE IF NOT EXISTS `user_data`(
     `Id` string,
     `Name` string,
