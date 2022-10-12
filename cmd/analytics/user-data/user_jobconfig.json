@@ -9,5 +9,9 @@
           }
       }
   ],
-  "monitoringConfiguration": {}
+  "monitoringConfiguration": {
+    "s3MonitoringConfiguration": {
+        "logUri": "s3://jrolstad-identityobjects/hive/logs/"
+    }
+}
 }
