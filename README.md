@@ -1,6 +1,8 @@
 # LDAP Identity Api
 A simple API wrapper around the Lightweight Directory Access Protocol (LDAP).  Meant to showcase how data from Active Directory or any other LDAP instance can be exposed via API and not direct LDAP searches.
 
+There are separate components that read LDAP data and push to an Amazon S3 bucket so that data can be used by Elastic Map Reduce (EMR) jobs for sumarized information about objects in the directory.
+
 ## Requirements
 * golang 1.18 or higher
 
@@ -9,6 +11,9 @@ A simple API wrapper around the Lightweight Directory Access Protocol (LDAP).  M
 |Name| Description                                                                               |
 |---|-------------------------------------------------------------------------------------------|
 |cmd/api-server| Main API endpoints for the service.  Hosted using [Gin](https://github.com/gin-gonic/gin) |
+|cmd/cli|Command line interface that runs the processing jobs|
+|cmd/lambda-directoryobjectreceiver|AWS Lambda function that consumes messages from an SQS queue and saves them to an S3 bucket|
+|cmd/analytics|Hive, Spark, and configuration files used to perform analytics on data in the S3 bucket|
 
 ### Packages
 |Name| Description                                                        |
